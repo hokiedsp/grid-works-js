@@ -23,9 +23,9 @@ import "./gridworks.css";
 //    load
 
 class gridWorks {
-  static _pad(values, len) {
-    let last_value = values[values.length - 1];
-    while (values.length < len) values.push(last_value);
+  static _pad(values, len, default_value) {
+    if (default_value === undefined) default_value = values[values.length - 1];
+    while (values.length < len) values.push(default_value);
     return values;
   }
   get enabled() {
@@ -78,22 +78,14 @@ class gridWorks {
     values = [...values].map(
       value => (isFinite(value) && value > 0 ? value : 1)
     );
-    this._colMinWidths = gridWorks._pad(
-      values,
-      this._colWidths.length,
-      values[values.length - 1]
-    );
+    this._colMinWidths = gridWorks._pad(values, this._colWidths.length);
   }
   get colMaxWidths() {
     return this._colMaxWidths;
   }
   set colMaxWidths(values) {
     values = [...values].map(value => (value > 0 ? value : Infinity));
-    this._colMaxWidths = gridWorks._pad(
-      values,
-      this._colWidths.length,
-      values[values.length - 1]
-    );
+    this._colMaxWidths = gridWorks._pad(values, this._colWidths.length);
   }
   get rowMinHeights() {
     return this._rowMinHeights;
@@ -102,35 +94,27 @@ class gridWorks {
     values = [...values].map(
       value => (isFinite(value) && value > 0 ? value : 1)
     );
-    this._rowMinHeights = gridWorks._pad(
-      values,
-      this._rowHeights.length,
-      values[values.length - 1]
-    );
+    this._rowMinHeights = gridWorks._pad(values, this._rowHeights.length);
   }
   get rowMaxHeights() {
     return this._rowMaxHeights;
   }
   set rowMaxHeights(values) {
     values = [...values].map(value => (value > 0 ? value : Infinity));
-    this._rowMaxHeights = gridWorks._pad(
-      values,
-      this._rowHeights.length,
-      values[values.length - 1]
-    );
+    this._rowMaxHeights = gridWorks._pad(values, this._rowHeights.length);
   }
 
   constructor(eGrid) {
     // options
-    this._colLineFixed = []; // element true to make the column edge unadjustable, default: false
-    this._rowLineFixed = []; // element true make the row edge unadjustable, default: false
-    // this._colHidden = []; // element true to make the column edge unadjustable, default: false
-    // this._rowHidden = []; // element true make the row edge unadjustable, default: false
+    this._colLineFixed = [false]; // element true to make the column edge unadjustable, default: false
+    this._rowLineFixed = [false]; // element true make the row edge unadjustable, default: false
+    // this._colHidden = [false]; // element true to make the column edge unadjustable, default: false
+    // this._rowHidden = [false]; // element true make the row edge unadjustable, default: false
 
-    this._colMinWidths = []; // element sets minimum column width in pixels
-    this._colMaxWidths = []; // element sets maximum column width in pixels
-    this._rowMinHeights = []; // element sets minimum row height in pixels
-    this._rowMaxHeights = []; // element sets maximum row height in pixels
+    this._colMinWidths = [1]; // element sets minimum column width in pixels
+    this._colMaxWidths = [Infinity]; // element sets maximum column width in pixels
+    this._rowMinHeights = [1]; // element sets minimum row height in pixels
+    this._rowMaxHeights = [Infinity]; // element sets maximum row height in pixels
 
     this._eGrid = eGrid;
     this._colLineNames = [];
@@ -213,7 +197,7 @@ class gridWorks {
     const parseTemplateDefs = (cssParams, offset) => {
       let wasSize = cssParams.template[0] != "[";
       let sizes = [],
-        names = wasSize ? [[]] : [];
+        names = wasSize ? [""] : [];
       cssParams.template.match(/(\[[^\]]+\])|([\d\.]+)/g).forEach(token => {
         if (token[0] == "[") {
           // edge names
@@ -461,6 +445,8 @@ class gridWorks {
   }
 
   onMouseDownBorder(e) {
+    this._state = 1;
+
     // id which border(s) is hit
     let on = this._on_border(e);
     if (on.left) this._activeColLine = this._currentCell.left;
@@ -469,10 +455,13 @@ class gridWorks {
     else if (on.bottom) this._activeRowLine = this._currentCell.bottom;
 
     // check for "erroneous" callback
-    if (this._activeColLine < 0 && this._activeRowLine < 0) return 0;
+    if (this._activeColLine < 0 && this._activeRowLine < 0) {
+      this._state = 0;
+      return 0;
+    }
 
-    // turn on grid-adjuster
-    this._state = 1;
+    // indicate grabbed state for css
+    this._currentCell.eBorder.classList.add("grabbed");
 
     // store the current mouse pointer location
     if (this._activeColLine >= 0)
@@ -492,6 +481,7 @@ class gridWorks {
 
     // turn off grid-adjuster
     this._state = 0;
+    this._currentCell.eBorder.classList.remove("grabbed");
 
     // clear active line indicators
     this._activeColLine = -1;
@@ -523,10 +513,16 @@ class gridWorks {
     sizes[line] = newSize1;
 
     // update the template
-    this._eGrid.style[cssName] = sizes.reduce((cssstr, size, i) => {
-      cssstr += size + "px" + names[i + 1];
-      return cssstr;
-    }, names[0]);
+    this._eGrid.style[cssName] = sizes
+      .reduce(
+        (csswords, size, i) => {
+          csswords.push(size + "px");
+          csswords.push(names[i + 1]);
+          return csswords;
+        },
+        [names[0]]
+      )
+      .join(" ");
 
     // return updated edges & sizes
     return {
@@ -537,6 +533,7 @@ class gridWorks {
 
   onMouseMove(e) {
     e.preventDefault();
+
     if (this._activeColLine >= 0)
       ({
         sizes: this._colWidths,
@@ -576,7 +573,7 @@ Object.defineProperty(HTMLElement.prototype, "gridWorks", {
     const attachGridWorks = (...args) => {
       try {
         Object.defineProperty(elem, "gridWorks", {
-          value: new gridWorks(elem,args)
+          value: new gridWorks(elem, args)
         });
         return elem.gridWorks;
       } catch (e) {
