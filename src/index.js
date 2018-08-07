@@ -1,6 +1,6 @@
 "use strict";
 
-import './gridworks.css';
+import "./gridworks.css";
 
 // Javascript function to enable user interaction on CSS-Grid
 // - enable/disable mouse interaction to resize
@@ -120,18 +120,17 @@ class gridWorks {
     );
   }
 
-  constructor(eGrid, opts) {
+  constructor(eGrid) {
     // options
-    this._enabled = true;
-    this._colLineFixed = [false]; // element true to make the column edge unadjustable, default: false
-    this._rowLineFixed = [false]; // element true make the row edge unadjustable, default: false
-    // this._colHidden = [false]; // element true to make the column edge unadjustable, default: false
-    // this._rowHidden = [false]; // element true make the row edge unadjustable, default: false
+    this._colLineFixed = []; // element true to make the column edge unadjustable, default: false
+    this._rowLineFixed = []; // element true make the row edge unadjustable, default: false
+    // this._colHidden = []; // element true to make the column edge unadjustable, default: false
+    // this._rowHidden = []; // element true make the row edge unadjustable, default: false
 
-    this._colMinWidths = [1]; // element sets minimum column width in pixels
-    this._colMaxWidths = [Infinity]; // element sets maximum column width in pixels
-    this._rowMinHeights = [1]; // element sets minimum row height in pixels
-    this._rowMaxHeights = [Infinity]; // element sets maximum row height in pixels
+    this._colMinWidths = []; // element sets minimum column width in pixels
+    this._colMaxWidths = []; // element sets maximum column width in pixels
+    this._rowMinHeights = []; // element sets minimum row height in pixels
+    this._rowMaxHeights = []; // element sets maximum row height in pixels
 
     this._eGrid = eGrid;
     this._colLineNames = [];
@@ -164,6 +163,9 @@ class gridWorks {
     this._mousedown = this.onMouseDownBorder.bind(this);
     this._onmousemove = this.onMouseMove.bind(this);
     this._onmouseup = this.onMouseUp.bind(this);
+
+    // enable the grid interactiveness
+    this.enable();
   }
 
   enable() {
@@ -363,7 +365,6 @@ class gridWorks {
   }
 
   _is_adjustable(line, edge, fixed_edges) {
-    console.log(!(fixed_edges[line] || line == edge));
     return !(fixed_edges[line] || line == edge);
   }
 
@@ -566,28 +567,23 @@ class gridWorks {
         this._rowMaxHeights
       ));
   }
-
-  setOptions(opts) {
-    if (opts._colLineFixed) {
-      // options
-      this._colLineFixed = []; // element true to make the column edge unadjustable, default: false
-    }
-    this._colMinWidths = []; // element sets minimum column width in pixels
-    this._colMaxWidths = []; // element sets maximum column width in pixels
-    this._rowLineFixed = []; // element true make the row edge unadjustable, default: false
-    this._rowMinHeights = []; // element sets minimum row height in pixels
-    this._rowMaxHeights = []; // element sets maximum row height in pixels
-  }
 }
 
-// make gridWorks available to all Objects
-Object.defineProperty(Element.prototype, "gridWorks", {
+// make gridWorks available to all DOM objects
+Object.defineProperty(HTMLElement.prototype, "gridWorks", {
   get: function() {
-    Object.defineProperty(this, "gridWorks", {
-      value: new gridWorks(this, [...arguments])
-    });
-
-    return this.gridWorks;
+    let elem = this;
+    const attachGridWorks = (...args) => {
+      try {
+        Object.defineProperty(elem, "gridWorks", {
+          value: new gridWorks(elem,args)
+        });
+        return elem.gridWorks;
+      } catch (e) {
+        return null;
+      }
+    };
+    return attachGridWorks;
   },
   configurable: true,
   writeable: false
