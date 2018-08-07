@@ -104,8 +104,7 @@ class gridWorks {
     this._rowMaxHeights = gridWorks._pad(values, this._rowHeights.length);
   }
 
-  constructor(eGrid) {
-    // options
+  constructor(eGrid,opts) {
     this._colLineFixed = [false]; // element true to make the column edge unadjustable, default: false
     this._rowLineFixed = [false]; // element true make the row edge unadjustable, default: false
     // this._colHidden = [false]; // element true to make the column edge unadjustable, default: false
@@ -131,6 +130,7 @@ class gridWorks {
     this._offsetX0;
     this._offsetY0;
 
+    // HTML element must have its display CSS property set to "grid"
     if (
       ["grid", "inline-grid"].every(
         value => value !== window.getComputedStyle(this._eGrid).display
@@ -138,6 +138,10 @@ class gridWorks {
     )
       throw "Container is not a grid";
 
+    // if options are given, set'em
+    if (opts) Object.assign(this, opts);
+
+    // analyze & configure the grid interactivity
     this._analyze(); // get grid lines and layout of its items
     this._configure(); // set callbacks on its items
 
@@ -573,7 +577,7 @@ Object.defineProperty(HTMLElement.prototype, "gridWorks", {
     const attachGridWorks = (...args) => {
       try {
         Object.defineProperty(elem, "gridWorks", {
-          value: new gridWorks(elem, args)
+          value: new gridWorks(elem, ...args)
         });
         return elem.gridWorks;
       } catch (e) {
