@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <style>
+    .wrapper {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-auto-rows: 100px;
+    }
+
+    .box1 {
+      grid-column-start: 1;
+      grid-column-end: 4;
+      grid-row-start: 1;
+      grid-row-end: 3;
+    }
+
+    .box3 {
+      grid-row-start: 3;
+      grid-row-end: 5;
+      grid-column-start: 1;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    .wrapper {
+      border: 2px solid #f76707;
+      border-radius: 5px;
+      background-color: #fff4e6;
+    }
+
+    .wrapper div {
+      border: 2px solid #ffa94d;
+      border-radius: 5px;
+      background-color: #ffd8a8;
+      padding: 1em;
+      color: #d9480f;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    <div class="box1">One</div>
+    <div class="box2">Two</div>
+    <div class="box3">Three</div>
+    <div class="box4">Four</div>
+    <div class="box5">Five</div>
+  </div>
+
+  <script src="../src/gridworks.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      let gridwork = new gridWorks(document.querySelector(".wrapper"));
+      console.log(gridwork)
+    })
+  </script>
+</body>
+
+</html>

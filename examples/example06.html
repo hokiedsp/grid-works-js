@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<!-- based on examples in https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Grid_Layout/Layout_using_Named_Grid_Lines -->
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <style>
+    .wrapper {
+      display: grid;
+      grid-template-columns: [main-start] 1fr [content-start] 1fr [content-end] 1fr [main-end];
+      grid-template-rows: [main-start] 100px [content-start] 100px [content-end] 100px [main-end];
+    }
+
+    .box1 {
+      grid-column-start: main-start;
+      grid-row-start: main-start;
+      grid-row-end: main-end;
+    }
+
+    .box2 {
+      grid-column-start: content-end;
+      grid-row-start: main-start;
+      grid-row-end: content-end;
+    }
+
+    .box3 {
+      grid-column-start: content-start;
+      grid-row-start: main-start;
+    }
+
+    .box4 {
+      grid-column-start: content-start;
+      grid-column-end: main-end;
+      grid-row-start: content-end;
+    }
+
+    .wrapper {
+      border: 2px solid #f76707;
+      border-radius: 5px;
+      background-color: #fff4e6;
+    }
+
+    .wrapper div {
+      border: 2px solid #ffa94d;
+      border-radius: 5px;
+      background-color: #ffd8a8;
+      padding: 1em;
+      margin: 7px;
+      color: #d9480f;
+    }
+  </style>
+  <link rel="stylesheet" type="text/css" href="../dist/gridworks.min.css">
+</head>
+
+<body>
+  <div class="wrapper" style="margin: 5px;padding: 5px;border-width: 3px">
+    <div class="box1">One</div>
+    <div class="box2">Two</div>
+    <div class="box3">Three</div>
+    <div class="box4">Four</div>
+  </div>
+
+  <script src="../dist/gridworks.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      
+      let div = document.querySelector(".wrapper");
+      console.log(div)
+      div.gridWorks();
+      console.log(div)
+    })
+  </script>
+</body>
+
+</html>

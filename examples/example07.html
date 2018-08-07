@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!-- based on examples in https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Grid_Layout/Layout_using_Named_Grid_Lines -->
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <style>
+    .wrapper {
+      display: grid;
+      grid-template-columns: [main-start] 1fr [content-start] 1fr [content-end] 1fr [main-end];
+      grid-template-rows: [main-start] 100px [content-start] 100px [content-end] 100px [main-end];
+    }
+
+    .thing {
+      grid-area: content;
+    }
+
+    */ * {
+      box-sizing: border-box;
+    }
+
+    .wrapper {
+      border: 2px solid #f76707;
+      border-radius: 5px;
+      background-color: #fff4e6;
+    }
+
+    .wrapper div {
+      border: 2px solid #ffa94d;
+      border-radius: 5px;
+      background-color: #ffd8a8;
+      padding: 1em;
+      color: #d9480f;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    <div class="thing">I am placed in an area named content.</div>
+  </div>
+
+  <script src="../src/gridworks.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      let gridwork = new gridWorks(document.querySelector(".wrapper"));
+      console.log(gridwork)
+    })
+  </script>
+</body>
+
+</html>

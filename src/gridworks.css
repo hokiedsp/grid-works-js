@@ -1,0 +1,25 @@
+.grid-works {
+  box-sizing: border-box;
+}
+.grid-works.col.border:hover {
+  cursor: col-resize;
+}
+
+.grid-works.row.border:hover {
+  cursor: row-resize;
+}
+
+.grid-works.col.row.border:hover {
+  cursor: all-scroll;
+}
+
+.grid-works.content:hover {
+  cursor: auto;
+}
+
+.grid-works.content {
+  -webkit-user-select: none;  /* Chrome all / Safari all */
+  -moz-user-select: none;     /* Firefox all */
+  -ms-user-select: none;      /* IE 10+ */
+  user-select: none;          /* Likely future */     
+}
