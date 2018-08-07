@@ -4,6 +4,7 @@
 
 <head>
   <meta charset="utf-8">
+  <link rel="stylesheet" type="text/css" href="../dist/gridworks.css">
   <style>
     .wrapper {
       display: grid;
@@ -40,11 +41,11 @@
     <div class="thing">I am placed in an area named content.</div>
   </div>
 
-  <script src="../src/gridworks.js"></script>
+  <script src="../dist/gridworks.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
-      let gridwork = new gridWorks(document.querySelector(".wrapper"));
-      console.log(gridwork)
+      let div = document.querySelector(".wrapper");
+      div.gridWorks();
     })
   </script>
 </body>
