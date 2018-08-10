@@ -104,16 +104,16 @@ class gridWorks {
     this._rowMaxHeights = gridWorks._pad(values, this._rowHeights.length);
   }
 
-  constructor(eGrid,opts) {
-    this._colLineFixed = [false]; // element true to make the column edge unadjustable, default: false
-    this._rowLineFixed = [false]; // element true make the row edge unadjustable, default: false
-    // this._colHidden = [false]; // element true to make the column edge unadjustable, default: false
-    // this._rowHidden = [false]; // element true make the row edge unadjustable, default: false
+  constructor(eGrid, opts) {
+    this._colLineFixed = [false]; // elem true to make the column edge unadjustable, default: false
+    this._rowLineFixed = [false]; // elem true make the row edge unadjustable, default: false
+    // this._colHidden = [false]; // elem true to make the column edge unadjustable, default: false
+    // this._rowHidden = [false]; // elem true make the row edge unadjustable, default: false
 
-    this._colMinWidths = [1]; // element sets minimum column width in pixels
-    this._colMaxWidths = [Infinity]; // element sets maximum column width in pixels
-    this._rowMinHeights = [1]; // element sets minimum row height in pixels
-    this._rowMaxHeights = [Infinity]; // element sets maximum row height in pixels
+    this._colMinWidths = [1]; // elem sets minimum column width in pixels
+    this._colMaxWidths = [Infinity]; // elem sets maximum column width in pixels
+    this._rowMinHeights = [1]; // elem sets minimum row height in pixels
+    this._rowMaxHeights = [Infinity]; // elem sets maximum row height in pixels
 
     this._eGrid = eGrid;
     this._colLineNames = [];
@@ -130,7 +130,7 @@ class gridWorks {
     this._offsetX0;
     this._offsetY0;
 
-    // HTML element must have its display CSS property set to "grid"
+    // HTML elem must have its display CSS property set to "grid"
     if (
       ["grid", "inline-grid"].every(
         value => value !== window.getComputedStyle(this._eGrid).display
@@ -146,11 +146,10 @@ class gridWorks {
     this._configure(); // set callbacks on its items
 
     // create object-bound callback functions
-    this._mouseover = this.onMouseOverBorder.bind(this);
-    this._mouseout = this.onMouseOutBorder.bind(this);
-    this._mousedown = this.onMouseDownBorder.bind(this);
-    this._onmousemove = this.onMouseMove.bind(this);
-    this._onmouseup = this.onMouseUp.bind(this);
+    this._onmousehover = this.onMouseHover.bind(this);
+    this._onmousedown = this.onMouseDown.bind(this);
+    this._onwinmousemove = this.onWindowMouseMove.bind(this);
+    this._onwinmouseup = this.onWindowMouseUp.bind(this);
 
     // enable the grid interactiveness
     this.enable();
@@ -161,9 +160,10 @@ class gridWorks {
     this._enabled = true;
     this._gridCells.forEach(cell => {
       // add mouse event listeners
-      cell.eBorder.addEventListener("mouseover", this._mouseover);
-      cell.eBorder.addEventListener("mouseout", this._mouseout);
-      cell.eBorder.addEventListener("mousedown", this._mousedown);
+      cell.eCell.addEventListener("mouseenter", this._onmousehover);
+      cell.eCell.addEventListener("mouseleave", this._onmousehover);
+      cell.eCell.addEventListener("mousemove", this._onmousehover);
+      cell.eCell.addEventListener("mousedown", this._onmousedown);
     });
   }
   disable() {
@@ -171,9 +171,9 @@ class gridWorks {
     this._enabled = false;
     this._gridCells.forEach(cell => {
       // add mouse event listeners
-      cell.eBorder.removeEventListener("mouseover", this._mouseover);
-      cell.eBorder.removeEventListener("mouseout", this._mouseout);
-      cell.eBorder.removeEventListener("mousedown", this._mousedown);
+      cell.eCell.removeEventListener("mouseover", this._onmousehover);
+      cell.eCell.removeEventListener("mouseout", this._onmousehover);
+      cell.eCell.removeEventListener("mousedown", this._onmousedown);
     });
   }
   // hide() {}
@@ -278,7 +278,7 @@ class gridWorks {
       };
       return (
         r.push({
-          eBorder: cell,
+          eCell: cell,
           eCellCSS: css,
           left: findLine(
             cellRect.left - cssPxSize(css.marginLeft),
@@ -309,36 +309,7 @@ class gridWorks {
     this._eGrid.classList.add("grid-works", "wrapper");
     this._gridCells.forEach(cell => {
       // insert a borderless div between the grid cell and its content
-      let cssBorder = window.getComputedStyle(cell.eBorder);
-      let innerHTML = cell.eBorder.innerHTML;
-
-      //
-      let eContent = document.createElement("div");
-      eContent.className = "grid-works content";
-      eContent.classList.add(...cell.eBorder.classList);
-      eContent.innerHTML = innerHTML;
-
-      eContent.style =
-        "height: 100%; width: 100%; margin: 0; border: none; padding: 0";
-      eContent.style.paddingLeft = cssBorder.paddingLeft;
-      eContent.style.paddingTop = cssBorder.paddingTop;
-      eContent.style.paddingRight = cssBorder.paddingRight;
-      eContent.style.paddingBottom = cssBorder.paddingBottom;
-      cell.eContent = eContent;
-
-      cell.eBorder.classList.add("grid-works", "border");
-      cell.eBorder.innerHTML = "";
-      cell.eBorder.appendChild(eContent);
-      cell.eBorder.style.padding = "0";
-
-      cell.eContent.addEventListener("mouseover", e => {
-        // stop eContent's mouseover to bubble to eBorder
-        e.stopPropagation();
-      });
-      cell.eContent.addEventListener("mouseout", e => {
-        // stop eContent's mouseout to bubble to eBorder
-        e.stopPropagation();
-      });
+      cell.eCell.classList.add("grid-works", "cell");
     });
 
     // set configurations
@@ -360,40 +331,31 @@ class gridWorks {
     // initialize return object
     let rval = { left: false, right: false, top: false, bottom: false };
 
+    let elem = e.target;
+
     // get current cell, exit if not on border
-    this._currentCell = this._gridCells.find(cell => e.target == cell.eBorder);
+    this._currentCell = this._gridCells.find(cell => elem == cell.eCell);
     if (!this._currentCell) return rval;
 
     // detect if mouse is on which border
-    let left_offset = e.clientX - e.target.offsetLeft;
-    let right_offset =
-      e.target.offsetLeft + e.target.offsetWidth - e.clientX - 1;
-    let top_offset = e.clientY - e.target.offsetTop;
-    let bottom_offset =
-      e.target.offsetTop + e.target.offsetHeight - e.clientY - 1;
-
-    let left_thickness = getComputedStyle(e.target).borderLeftWidth.slice(
-      0,
-      -2
-    );
-    let right_thickness = getComputedStyle(e.target).borderRightWidth.slice(
-      0,
-      -2
-    );
-    let top_thickness = getComputedStyle(e.target).borderTopWidth.slice(0, -2);
-    let bottom_thickness = getComputedStyle(e.target).borderBottomWidth.slice(
-      0,
-      -2
-    );
+    let rect = elem.getBoundingClientRect();
+    let left_offset = e.clientX - rect.left;
+    let right_offset = rect.right - e.clientX - 1;
+    let top_offset = e.clientY - rect.top;
+    let bottom_offset = rect.bottom - e.clientY - 1;
+    let left_bd = Math.max(3, 1 + Number(getComputedStyle(elem).borderLeftWidth.slice(0, -2)));
+    let right_bd = Math.max(3, 1 + Number(getComputedStyle(elem).borderRightWidth.slice(0, -2)));
+    let top_bd = Math.max(3, 1 + Number(getComputedStyle(elem).borderTopWidth.slice(0, -2)));
+    let bottom_bd = Math.max(3, 1 + Number(getComputedStyle(elem).borderBottomWidth.slice(0, -2)));
 
     // then check if the lines are adjustable
-    if (left_offset <= left_thickness) {
+    if (left_offset <= left_bd) {
       rval.left = this._is_adjustable(
         this._currentCell.left,
         0,
         this._colLineFixed
       );
-    } else if (right_offset <= right_thickness) {
+    } else if (right_offset <= right_bd) {
       rval.right = this._is_adjustable(
         this._currentCell.right,
         this._colLinePositions.length - 1,
@@ -401,13 +363,13 @@ class gridWorks {
       );
     }
 
-    if (top_offset <= top_thickness) {
+    if (top_offset <= top_bd) {
       rval.top = this._is_adjustable(
         this._currentCell.top,
         0,
         this._rowLineFixed
       );
-    } else if (bottom_offset <= bottom_thickness) {
+    } else if (bottom_offset <= bottom_bd) {
       rval.bottom = this._is_adjustable(
         this._currentCell.bottom,
         this._rowLinePositions.length - 1,
@@ -417,46 +379,46 @@ class gridWorks {
     return rval;
   }
 
-  onMouseOverBorder(e) {
-    if (this._state > 0) return;
+  onMouseHover(e) {
+    // console.log(e);
 
-    // detect what could be adjusted: col/row/both
-    let on = this._on_border(e);
+    let elem = e.target;
 
-    // set eBorder class
-    if (on.left || on.right) e.target.classList.add("col");
-    if (on.top || on.bottom) e.target.classList.add("row");
+    if (e.type == "mouseleave") {
+      elem.classList.remove("left", "right", "top", "bottom");
+    } else {
+      // detect what could be adjusted: col/row/both
+      let on = this._on_border(e);
+
+      // check for hitting vertical border
+      let hitCol = true;
+      if (on.left) elem.classList.add("left");
+      else if (on.right) elem.classList.add("right");
+      else hitCol = false;
+
+      // check for hitting horizontal border
+      let hitRow = true;
+      if (on.top) elem.classList.add("top");
+      else if (on.bottom) elem.classList.add("bottom");
+      else hitRow = false;
+
+      // clear if none hit
+      if (!(hitCol || hitRow))
+        elem.classList.remove("left", "right", "top", "bottom");
+    }
   }
 
-  onMouseMoveBorder(e) {
-    if (this._state > 0) return;
-
-    // detect what could be adjusted: col/row/both
-    let on = this._on_border(e);
-
-    // update eBorder class
-    if (on.left || on.right) e.target.classList.add("col");
-    else e.target.classList.remove("col");
-    if (on.top || on.bottom) e.target.classList.add("row");
-    else e.target.classList.remove("row");
-  }
-
-  onMouseOutBorder(e) {
-    if (this._state > 0) return;
-
-    // turn off cursor only if not active
-    if (!this._state) e.target.classList.remove("col", "row");
-  }
-
-  onMouseDownBorder(e) {
+  onMouseDown(e) {
     this._state = 1;
+
+    let cell = this._currentCell;
 
     // id which border(s) is hit
     let on = this._on_border(e);
-    if (on.left) this._activeColLine = this._currentCell.left;
-    else if (on.right) this._activeColLine = this._currentCell.right;
-    if (on.top) this._activeRowLine = this._currentCell.top;
-    else if (on.bottom) this._activeRowLine = this._currentCell.bottom;
+    if (on.left) this._activeColLine = cell.left;
+    else if (on.right) this._activeColLine = cell.right;
+    if (on.top) this._activeRowLine = cell.top;
+    else if (on.bottom) this._activeRowLine = cell.bottom;
 
     // check for "erroneous" callback
     if (this._activeColLine < 0 && this._activeRowLine < 0) {
@@ -465,7 +427,7 @@ class gridWorks {
     }
 
     // indicate grabbed state for css
-    this._currentCell.eBorder.classList.add("grabbed");
+    cell.eCell.classList.add("grabbed");
 
     // store the current mouse pointer location
     if (this._activeColLine >= 0)
@@ -473,19 +435,27 @@ class gridWorks {
     if (this._activeRowLine >= 0)
       this._offsetY0 = this._rowLinePositions[this._activeRowLine] - e.pageY;
 
-    // add window mousemove callback
-    window.addEventListener("mousemove", this._onmousemove);
-    window.addEventListener("mouseup", this._onmouseup);
+    // switch mouse callbacks
+    cell.eCell.removeEventListener("mouseenter", this._onmousehover);
+    cell.eCell.removeEventListener("mouseleave", this._onmousehover);
+    cell.eCell.removeEventListener("mousemove", this._onmousehover);
+    window.addEventListener("mousemove", this._onwinmousemove);
+    window.addEventListener("mouseup", this._onwinmouseup);
   }
 
-  onMouseUp(e) {
-    // remove the mousemove callback
-    window.removeEventListener("mousemove", this._onmousemove);
-    window.removeEventListener("mouseup", this._onmouseup);
+  onWindowMouseUp(e) {
+    let cell = this._currentCell;
+
+    // switch the mousemove callbacks
+    window.removeEventListener("mousemove", this._onwinmousemove);
+    window.removeEventListener("mouseup", this._onwinmouseup);
+    cell.eCell.addEventListener("mouseenter", this._onmousehover);
+    cell.eCell.addEventListener("mouseleave", this._onmousehover);
+    cell.eCell.addEventListener("mousemove", this._onmousehover);
 
     // turn off grid-adjuster
     this._state = 0;
-    this._currentCell.eBorder.classList.remove("grabbed");
+    cell.eCell.classList.remove("grabbed");
 
     // clear active line indicators
     this._activeColLine = -1;
@@ -535,7 +505,7 @@ class gridWorks {
     };
   }
 
-  onMouseMove(e) {
+  onWindowMouseMove(e) {
     e.preventDefault();
 
     if (this._activeColLine >= 0)

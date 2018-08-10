@@ -1,25 +1,26 @@
 .grid-works {
   box-sizing: border-box;
 }
-.grid-works.col.border:hover {
+.grid-works.cell.left:hover,
+.grid-works.cell.right:hover {
   cursor: col-resize;
 }
 
-.grid-works.row.border:hover {
+.grid-works.cell.top:hover,
+.grid-works.cell.bottom:hover {
   cursor: row-resize;
 }
 
-.grid-works.col.row.border:hover {
+.grid-works.cell.left.top:hover,
+.grid-works.cell.left.bottom:hover,
+.grid-works.cell.right.top:hover,
+.grid-works.cell.right.bottom:hover {
   cursor: all-scroll;
 }
 
-.grid-works.content:hover {
-  cursor: auto;
-}
-
-.grid-works.content {
-  -webkit-user-select: none;  /* Chrome all / Safari all */
-  -moz-user-select: none;     /* Firefox all */
-  -ms-user-select: none;      /* IE 10+ */
-  user-select: none;          /* Likely future */     
+.grid-works.cell {
+  -webkit-user-select: none; /* Chrome all / Safari all */
+  -moz-user-select: none; /* Firefox all */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none; /* Likely future */
 }

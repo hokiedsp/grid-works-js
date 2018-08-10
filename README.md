@@ -86,6 +86,6 @@ document.querySelector("#mygrid").gridWorks.disable();
 
 - [ ] Complete documentation
 - [ ] Add testing
-- [ ] Support borderless grid cell
+- [X] Support borderless grid cell
 - [ ] Hide/Show column/row
 - [ ] "Accordion" mode of operation

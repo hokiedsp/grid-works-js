@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <style>
+    .panel-container {
+      display: grid;
+      width: 100%;
+      height: 400px;
+      grid-template-columns: 1fr 2fr 1fr;
+    }
+
+    #left-panel {
+      grid-column-start: 1;
+      border-right-style: solid;
+      border-right-width: 3 px;
+    }
+
+    #center-panel {
+      grid-column-start: 2;
+      text-align: center;
+      resize: horizontal;
+    }
+
+    #right-panel {
+      grid-column-start: 3;
+      text-align: right;
+      border-left-style: solid;
+      border-left-width: 3 px;
+    }
+
+    /* #mainGrid {
+      width: 100%;
+    }
+
+    .grid-stack-item {
+      border-style: solid;
+    } */
+  </style>
+  <!-- <link rel="stylesheet" type="text/css" href="./node_modules/semantic-ui-css/semantic.min.css"> -->
+  <link rel="stylesheet" href="../dist/gridworks.css" />
+
+  <!-- <script src="./node_modules/jquery/dist/jquery.min.js"></script> -->
+  <!-- <script src="./node_modules/jquery-ui-stable/jquery-ui.min.js"></script> -->
+  <!-- <script src="./node_modules/lodash/lodash.min.js"></script> -->
+  <!-- <script src="./node_modules/semantic-ui-css/semantic.min.js"></script> -->
+  <script src="../dist/gridworks.js"></script>
+</head>
+
+<body>
+  <div id="layout-container" class="panel-container">
+    <div id="left-panel" class="left panel">1
+      <div class="panel-heading">
+        <h3 class="panel-title">Left Panel</h3>
+      </div>
+      <div class="panel-body">
+        content here
+      </div>
+    </div>
+    <div id="center-panel" class="center panel">2
+      <div class="panel-heading">
+        <h3 class="panel-title">Center Panel</h3>
+      </div>
+      <div class="panel-body">
+        content here
+      </div>
+    </div>
+    <div id="right-panel" class="right panel">3
+      <div class="panel-heading">
+        <h3 class="panel-title">Right Panel</h3>
+      </div>
+      <div class="panel-body">
+        content here
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      document.getElementById("layout-container").gridWorks({ colMinWidths: [100, 200, 100], colLineFixed: [true, true, false] });
+      console.log(document.getElementById("layout-container").gridWorks)
+    })
+  </script>
+</body>
+
+</html>
